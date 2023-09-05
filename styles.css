@@ -1,0 +1,17 @@
+#MainMenu {
+    visibility: hidden;
+}
+footer {
+    visibility: hidden;
+}
+.stats {
+    display: flex;
+}
+.stats p {
+    font-size: 12px;
+    padding-right: 10px;
+    opacity: 0.5
+}
+.loading {
+    font-size: 20px;
+}
