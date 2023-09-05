@@ -111,7 +111,6 @@ for msg in st.session_state.messages:
 
 if prompt := st.chat_input():
 
-    # st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
     field = st.chat_message("assistant")
