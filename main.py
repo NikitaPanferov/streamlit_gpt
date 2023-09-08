@@ -119,11 +119,12 @@ if prompt := st.chat_input():
 
     response = openai.ChatCompletion.create(model=st.session_state['model'], messages=get_history(prompt))
     msg = response.choices[0].message.content
+    max_history = 2 if st.session_state.get('messages') != [] and st.session_state.get('messages') == 2 else 4
     m = [
         {
             "role": "user",
             "content": prompt,
-            'tokens':  response['usage']['prompt_tokens'] if st.session_state.get('messages') == [] else response['usage']['prompt_tokens'] - sum([st.session_state.messages[-i]['tokens'] for i in range(1, 5)]),
+            'tokens':  response['usage']['prompt_tokens'] if st.session_state.get('messages') == [] else response['usage']['prompt_tokens'] - sum([st.session_state.messages[-i]['tokens'] for i in range(1, max_history+1)]),
             'total_tokens': response['usage']['prompt_tokens'],
             "model": st.session_state.model,
         },
