@@ -119,7 +119,8 @@ if prompt := st.chat_input():
 
     response = openai.ChatCompletion.create(model=st.session_state['model'], messages=get_history(prompt))
     msg = response.choices[0].message.content
-    max_history = 2 if st.session_state.get('messages') != [] and st.session_state.get('messages') == 2 else 4
+    if st.session_state.get('messages'):
+        max_history = min(4, len(st.session_state.messages))
     m = [
         {
             "role": "user",
