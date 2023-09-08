@@ -123,7 +123,7 @@ if prompt := st.chat_input():
         {
             "role": "user",
             "content": prompt,
-            'tokens':  response['usage']['prompt_tokens'] if st.session_state.get('messages') == [] else response['usage']['prompt_tokens'] - st.session_state.messages[-1]['tokens'] - st.session_state.messages[-2]['tokens'],
+            'tokens':  response['usage']['prompt_tokens'] if st.session_state.get('messages') == [] else response['usage']['prompt_tokens'] - sum([st.session_state.messages[-i]['tokens'] for i in range(1, 5)]),
             'total_tokens': response['usage']['prompt_tokens'],
             "model": st.session_state.model,
         },
