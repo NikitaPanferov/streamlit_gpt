@@ -51,7 +51,7 @@ stats_string = """
 
 
 def get_history(new_mes):
-    messages = [{'role': i['role'], 'content': i['content']} for i in st.session_state.messages]
+    messages = [{'role': i['role'], 'content': i['content']} for i in st.session_state.messages[-4:]]
     messages.append({"role": "user", "content": new_mes})
     return messages
 
