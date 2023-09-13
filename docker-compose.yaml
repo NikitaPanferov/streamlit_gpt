@@ -7,7 +7,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: yourpassword
     ports:
-      - 27017:27017
+      - "27017:27017"
 
   chat:
     build: .
@@ -19,5 +19,18 @@ services:
       MONGO_PASS: yourpassword
       MONGO_HOST: mongo
     ports:
-      - 8501:8501
+      - "8501:8501"
 
+  admin:
+    build:
+      context: .
+      dockerfile: admin.dockerfile
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      MONGO_USER: admin
+      MONGO_PASS: yourpassword
+      MONGO_HOST: mongo
+    ports:
+      - "8502:8502"

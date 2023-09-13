@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import openai
 import streamlit as st
@@ -128,6 +129,7 @@ if prompt := st.chat_input():
             'tokens':  response['usage']['prompt_tokens'] if st.session_state.get('messages') == [] else response['usage']['prompt_tokens'] - sum([st.session_state.messages[-i]['tokens'] for i in range(1, max_history+1)]),
             'total_tokens': response['usage']['prompt_tokens'],
             "model": st.session_state.model,
+            "datetime": datetime.now(),
         },
         {
             "role": "assistant",
@@ -135,6 +137,7 @@ if prompt := st.chat_input():
             'tokens': response['usage']['completion_tokens'],
             'total_tokens': response['usage']['total_tokens'],
             'model': st.session_state.model,
+            "datetime": datetime.now(),
         }
     ]
     usage = f"""
