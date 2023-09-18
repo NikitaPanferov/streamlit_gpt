@@ -18,6 +18,8 @@ services:
       MONGO_USER: admin
       MONGO_PASS: yourpassword
       MONGO_HOST: mongo
+    volumes:
+      - ./config.yaml:/app/config.yaml
     ports:
       - "8501:8501"
 
@@ -32,5 +34,7 @@ services:
       MONGO_USER: admin
       MONGO_PASS: yourpassword
       MONGO_HOST: mongo
+    volumes:
+      - ./config.yaml:/app/config.yaml
     ports:
       - "8502:8502"
