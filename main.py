@@ -59,7 +59,6 @@ def get_history(new_mes):
 
 def set_chat(name):
     def inner_func():
-        print('ok')
         st.session_state['chat'] = name
         st.session_state['collection'] = db[name]
         st.session_state["messages"] = list(st.session_state["collection"].find())
