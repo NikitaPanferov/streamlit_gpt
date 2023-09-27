@@ -1,5 +1,7 @@
 import os
+import uuid
 
+import pandas
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
@@ -130,42 +132,43 @@ def get_stats(client, username=None):
                 ct[message['model']][message['role']][hour] = ct[message['model']][message['role']].get(hour,
                                                                                                         0) + tokens
 
-    st.markdown("<h3 style='text-align: center;'>Кол-во запрос/за день</h3>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write('gpt-4')
-        st.dataframe(dz['gpt-4'])
+    return dz, dt, cz, ct
 
-    with col2:
-        st.write('gpt-3.5-turbo')
-        st.dataframe(dz['gpt-3.5-turbo'])
 
-    st.markdown("<h3 style='text-align: center;'>Кол-во токенов за день</h3>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write('gpt-4')
-        st.dataframe(dt['gpt-4'])
+def get_excel(data: dict):
+    name = f"{uuid.uuid4().hex}.xlsx"
+    with pandas.ExcelWriter(name, engine='xlsxwriter') as writer:
+        for name, df in data.items():
+            pandas.DataFrame(df[0]['gpt-3.5-turbo']).to_excel(writer, sheet_name=name, startrow=2)
+            pandas.DataFrame(df[0]['gpt-4']).to_excel(writer, sheet_name=name, startcol=3, startrow=2)
+            pandas.DataFrame(df[1]['gpt-3.5-turbo']).to_excel(writer, sheet_name=name, startcol=7, startrow=2)
+            pandas.DataFrame(df[1]['gpt-4']).to_excel(writer, sheet_name=name, startcol=10, startrow=2)
+            pandas.DataFrame(df[2]['gpt-3.5-turbo']).to_excel(writer, sheet_name=name, startcol=14, startrow=2)
+            pandas.DataFrame(df[2]['gpt-4']).to_excel(writer, sheet_name=name, startcol=17, startrow=2)
+            pandas.DataFrame(df[3]['gpt-3.5-turbo']).to_excel(writer, sheet_name=name, startcol=21, startrow=2)
+            pandas.DataFrame(df[3]['gpt-4']).to_excel(writer, sheet_name=name, startcol=24, startrow=2)
+            sheet = writer.sheets[name]
+            sheet.merge_range('A1:F1', 'Кол-во запрос/за день')
+            sheet.merge_range('A2:C2', 'gpt-3.5-turbo')
+            sheet.merge_range('D2:F2', 'gpt-4')
 
-    with col2:
-        st.write('gpt-3.5-turbo')
-        st.dataframe(dt['gpt-3.5-turbo'])
+            sheet.merge_range('H1:M1', 'Кол-во токенов за день')
+            sheet.merge_range('H2:J2', 'gpt-3.5-turbo')
+            sheet.merge_range('K2:M2', 'gpt-4')
 
-    st.markdown("<h3 style='text-align: center;'>Кол-во запросов и ответов по часам</h3>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write('gpt-4')
-        st.dataframe(cz['gpt-4'])
+            sheet.merge_range('O1:T1', 'Кол-во запросов и ответов по часам')
+            sheet.merge_range('O2:Q2', 'gpt-3.5-turbo')
+            sheet.merge_range('R2:T2', 'gpt-4')
 
-    with col2:
-        st.write('gpt-3.5-turbo')
-        st.dataframe(cz['gpt-3.5-turbo'])
+            sheet.merge_range('V1:AA1', 'Кол-во токенов по часам')
+            sheet.merge_range('V2:X2', 'gpt-3.5-turbo')
+            sheet.merge_range('Y2:AA2', 'gpt-4')
 
-    st.markdown("<h3 style='text-align: center;'>Кол-во токенов по часам</h3>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write('gpt-4')
-        st.dataframe(ct['gpt-4'])
 
-    with col2:
-        st.write('gpt-3.5-turbo')
-        st.dataframe(ct['gpt-3.5-turbo'])
+
+
+    with open(name, 'rb') as file:
+        out = file.read()
+
+    os.remove(name)
+    return out

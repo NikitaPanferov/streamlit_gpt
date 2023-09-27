@@ -3,6 +3,7 @@ from datetime import datetime
 
 import openai
 import streamlit as st
+from openai import InvalidRequestError
 from pymongo import MongoClient
 import streamlit_authenticator as stauth
 import yaml
@@ -45,16 +46,9 @@ chats = db.list_collection_names()
 with open('styles.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-stats_string = """
-        <div class='stats'> 
-            <p> Tokens {}</p>
-            <p> Total Tokens {}</p>
-        </div>
-        """
 
-
-def get_history(new_mes):
-    messages = [{'role': i['role'], 'content': i['content']} for i in st.session_state.messages[-4:]]
+def get_history(new_mes, count=4):
+    messages = [{'role': i['role'], 'content': i['content']} for i in st.session_state.messages[-count:]]
     messages.append({"role": "user", "content": new_mes})
     return messages
 
@@ -67,9 +61,19 @@ def set_chat(name):
     return inner_func
 
 
+def ask_gpt(model):
+    for i in range(4):
+        try:
+            return openai.ChatCompletion.create(model=model, messages=get_history(prompt, 4-i))
+        except InvalidRequestError:
+            pass
+
+
 with st.sidebar:
     st.write(f'Welcome *{st.session_state["username"]}*')
     authenticator.logout('Logout', 'main', key='unique_key')
+    if st.button('New Chat'):
+        st.session_state['chat'] = None
     version = st.selectbox("Choose ChatGPT version", ("3.5", "4.0"))
 
     if version == "3.5":
@@ -109,7 +113,6 @@ if "messages" not in st.session_state:
 for msg in st.session_state.messages:
     field = st.chat_message(msg["role"])
     field.write(msg["content"], unsafe_allow_html=True)
-    field.write(stats_string.format(msg["tokens"], msg["total_tokens"]), unsafe_allow_html=True)
 
 if prompt := st.chat_input():
 
@@ -118,8 +121,11 @@ if prompt := st.chat_input():
     field = st.chat_message("assistant")
     mess = field.empty()
     mess.write('<div class="loading">💬</>', unsafe_allow_html=True)
+    response = ask_gpt(model=st.session_state['model'])
+    if not response:
+        mess.error('Please reduce the length of the messages' + '' if st.session_state['model'] == 'gpt-4' else ' or change model to gpt-4')
+        st.stop()
 
-    response = openai.ChatCompletion.create(model=st.session_state['model'], messages=get_history(prompt))
     msg = response.choices[0].message.content
     if st.session_state.get('messages'):
         max_history = min(4, len(st.session_state.messages))
@@ -150,7 +156,4 @@ if prompt := st.chat_input():
     st.session_state.messages.extend(m)
     st.session_state.collection.insert_many(m)
 
-    print(st.session_state.messages)
-
     mess.write(msg)
-    field.write(usage, unsafe_allow_html=True)
