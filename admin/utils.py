@@ -136,8 +136,8 @@ def get_stats(client, username=None):
 
 
 def get_excel(data: dict):
-    name = f"{uuid.uuid4().hex}.xlsx"
-    with pandas.ExcelWriter(name, engine='xlsxwriter') as writer:
+    file_name = f"{uuid.uuid4().hex}.xlsx"
+    with pandas.ExcelWriter(file_name, engine='xlsxwriter') as writer:
         for name, df in data.items():
             pandas.DataFrame(df[0]['gpt-3.5-turbo']).to_excel(writer, sheet_name=name, startrow=2)
             pandas.DataFrame(df[0]['gpt-4']).to_excel(writer, sheet_name=name, startcol=3, startrow=2)
@@ -164,11 +164,8 @@ def get_excel(data: dict):
             sheet.merge_range('V2:X2', 'gpt-3.5-turbo')
             sheet.merge_range('Y2:AA2', 'gpt-4')
 
-
-
-
-    with open(name, 'rb') as file:
+    with open(file_name, 'rb') as file:
         out = file.read()
 
-    os.remove(name)
+    os.remove(file_name)
     return out
